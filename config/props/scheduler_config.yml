@@ -10,19 +10,19 @@ billing_password: vZSzE3wz4HD3ReKKv0GodA==
 
 producer_server: localhost
 producer_port: 8082
-producer_username: tigerit
+producer_username: com***
 producer_password: i1+ysQ8MQR7wx95a/hKtaA==
 
 communication_server: localhost
 communication_port: 8086
-communication_username: tigerit
+communication_username: com***
 communication_password: i1+ysQ8MQR7wx95a/hKtaA==
 #communication_username: test
 #communication_password: vZSzE3wz4HD3ReKKv0GodA==
 
 backup_server: localhost
 backup_port: 8089
-backup_username: tigerit
+backup_username: com***
 backup_password: i1+ysQ8MQR7wx95a/hKtaA==
 
 bill_generation: disable
