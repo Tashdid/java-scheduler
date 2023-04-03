@@ -1,0 +1,53 @@
+spring:
+  profiles:
+    active: dev #@activeProfileInjectedDuringWarBuild@
+  application:
+    name: 'scheduler-service'
+  config:
+    use-legacy-processing: true
+
+  #region [miscellaneous]
+  main:
+    allow-bean-definition-overriding: true
+  #region [miscellaneous]
+
+#region [custom init]
+app:
+  #region [jwt]
+  jwtSecret: 'billing_server_jwt_secret'
+  #1 hour
+  #jwtExpirationInMs: 3600000
+  #6 hour
+  jwtExpirationInMs: 21600000
+  #1 day
+  jwtRefreshExpirationMs: 86400000
+  #endregion [jwt]
+
+  #ddl: true
+  #db_init: false
+  #db_init_surp: true
+  #generate_dummy_bill: false
+  #db_cleanup: false
+
+#endregion [custom init]
+
+
+
+
+#region [Log]
+logging:
+  level:
+    root: INFO
+    com.netflix: FATAL
+    #[applied]
+    com.tigerit: INFO
+    org:
+      springframework:
+        WARN
+#      hibernate:
+#        .: INFO
+#        type: TRACE
+#endregion [Log]
+
+
+billGenerationCron: '1/10 * * * * ?'

@@ -1,0 +1,102 @@
+---
+configuration:
+  name: SchdulerServerLoggingConfiguration
+  status: warn
+  properties:
+    property:
+      - name: PROPERTY__PROJECT_NAME
+        value: "SmartBillProject"
+      - name: PROPERTY__MODULE_NAME
+        value: "scheduler" #Change only this from module to module #[SMART_BILL_PROJECT_TAG: CHANGE MODULE NAME] here
+      - name: PROPERTY__SYSTEM_FILE_SEPARATOR
+        value: "${sys:file.separator}"
+      - name: PROPERTY__SYSTEM_USER_HOME_DIRECTORY
+        value: "${sys:user.home}"
+      - name: PROPERTY__SYSTEM_USER_DIR_DIRECTORY
+        value: "${sys:user.dir}"
+      - name: PROPERTY__SYSTEM_USER_NAME
+        value: "${sys:user.name}"
+      - name: PROPERTY_LOG_OUTPUT_ALL_FILES_BASE_DIR  #This by default uses the 'user.dir' location. Which is 'E:\Workspace\Projects\SpringBootProjects\SmartBillProject' on dev environment.
+        #value: ../logs # x/y/z/../SmartBillProject/scheduler/logs/..               #[SMART_BILL_PROJECT_TAG: CHANGE_LOG_OUTPUT_FILE_PATH] here
+        value: "${PROPERTY__SYSTEM_USER_HOME_DIRECTORY}/${PROPERTY__PROJECT_NAME}/logs" #In dev, [C:\Users\hp\SmartBillProject\logs\]
+      - name: PROPERTY__LOG_OUTPUT_ALL_NON_ROLLING_FILES_BASE_DIR
+        value: "${PROPERTY_LOG_OUTPUT_ALL_FILES_BASE_DIR}/non-rolling"  #The non rolling files would be put here
+      - name: PROPERTY__LOG_OUTPUT_ALL_ROLLING_FILES_BASE_DIR
+        value: "${PROPERTY_LOG_OUTPUT_ALL_FILES_BASE_DIR}/rolling"  #The rolling files would be put here
+      - name: PROPERTY__LOG_OUTPUT_PATTERN
+        value: "%d{HH:mm:ss.SSS} [%highlight{%level}{FATAL=bg_red, ERROR=red, WARN=yellow, INFO=green, DEBUG=blue}] [%t]: %logger{36}.%M@L%L - %msg%n"
+    #thresholdFilter:
+    #level: debug #check: what does it do!
+  appenders:
+    Console:
+      - name: My-Console-Appender-1
+        target: SYSTEM_OUT
+        PatternLayout:
+          pattern: "${PROPERTY__LOG_OUTPUT_PATTERN}"
+        #- name: My-Console-Appender-2
+        #target: SYSTEM_OUT
+        #PatternLayout:s
+        #pattern: "${PROPERTY__LOG_OUTPUT_PATTERN}"
+    File:
+      - name: My-File-Appender-1
+        fileName: "${PROPERTY__LOG_OUTPUT_ALL_NON_ROLLING_FILES_BASE_DIR}/${PROPERTY__MODULE_NAME}/${PROPERTY__MODULE_NAME}_logs_from_file_appender_1.log"
+        PatternLayout:
+          pattern: "${PROPERTY__LOG_OUTPUT_PATTERN}"
+        createOnDemand: true
+        #- name: My-File-Appender-2
+        #fileName: "${PROPERTY__LOG_OUTPUT_ALL_NON_ROLLING_FILES_BASE_DIR}/${PROPERTY__MODULE_NAME}/${PROPERTY__MODULE_NAME}_logs_from_file_appender_2.log"
+        #PatternLayout:
+        #pattern: "${PROPERTY__LOG_OUTPUT_PATTERN}"
+    RollingFile:
+      - name: My-RollingFile-Appender-1
+        fileName: "${PROPERTY__LOG_OUTPUT_ALL_ROLLING_FILES_BASE_DIR}/${PROPERTY__MODULE_NAME}/${PROPERTY__MODULE_NAME}_logs_from_rolling_appender_1.log"
+        filePattern: "${PROPERTY__LOG_OUTPUT_ALL_ROLLING_FILES_BASE_DIR}/${PROPERTY__MODULE_NAME}/${PROPERTY__MODULE_NAME}_logs_from_rolling_appender_1.log.%d{yyyy-MM-dd-hh}-%i.gz"    #per hour
+        PatternLayout:
+          pattern: "${PROPERTY__LOG_OUTPUT_PATTERN}"
+        Policies:
+          OnStartupTriggeringPolicy: {}
+          SizeBasedTriggeringPolicy:
+            size: 1 MB
+          TimeBasedTriggeringPolicy: {}
+        DefaultRolloverStrategy:
+          max: '30' #xyz-3.log is fresher then xyz-2.log  #There can be at most 30 zip files. Each file can have a maximum size of 1MB as set above.
+          #min: '30'
+    NoSql:
+      - name: My-MongoDB-Appender-1
+        MongoDb:
+          databaseName: smart_bill_mongodb
+          collectionName: "logs_${PROPERTY__MODULE_NAME}"
+          #server: localhost #inject through profile? //todo
+          server: 192.168.99.100 #check: docker #it worked
+          #server: service-mongo-db #docker-compose #check: if working [so far, not working]
+          port: 27017
+          username: ''
+          password: ''
+
+  loggers:
+    logger: #These are app specific logger. CHANGE LEVELS here. [check]
+      - name: com.tigerit
+        level: trace #change log level here [SMART_BILL_PROJECT_TAG: CHANGE_LOG_LEVEL_HERE]
+        additivity: false #true = the logs will be passed to the parent. The parent then will JUST print those logs irrespective of the level set in parent.
+        appender-ref:
+          - ref: My-Console-Appender-1
+            level: trace
+          #- ref: My-File-Appender-1
+          #level: trace
+          - ref: My-RollingFile-Appender-1
+            level: trace #The level set in the logger (ie: com.tigerit) will take precedence over this level
+          - ref: My-MongoDB-Appender-1
+            level: trace
+    root: #This is the root logger
+      level: warn #By default: log4j2 sets its value as 'error' and prints to console
+      appender-ref:
+        - ref: My-Console-Appender-1
+          level: debug
+        - ref: My-RollingFile-Appender-1
+          level: debug
+        - ref: My-MongoDB-Appender-1
+          level: debug
+
+
+
+#additivity is a property of a logger(ie: loggerConfig), that just says whether to pass the log in a parent)

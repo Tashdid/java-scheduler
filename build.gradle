@@ -1,0 +1,103 @@
+plugins {
+    id 'war'
+}
+
+
+ext {
+    //set('springCloudVersion', "Hoxton.SR4")
+    //set('springCloudVersion', "Hoxton.SR1")
+    springCloudVersion = "${springCloudVersion}"
+}
+
+dependencyManagement {
+    imports {
+        mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
+    }
+}
+
+dependencies {
+
+    //custom module dependencies
+    //View endpoints docs in browser using OpenAPI
+    implementation (group: 'org.springdoc', name: 'springdoc-openapi-ui', version: project.getProperties().version__Springdoc_OpenAPI_UI) {
+        //Collision resolving for io.github.classgraph (cause when both springdoc-openapi-ui and springdoc-openapi-security is enabled. eg: in ':producerserver' module)
+        exclude group: 'io.github.classgraph', module: 'classgraph'
+    }
+    implementation project(':common')
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-data-rest'
+
+    //LOG
+    //implementation 'org.springframework.boot:spring-boot-starter-log4j2' //Not added here. Instead, it is added in Parent Project's build.gradle
+
+    //Making async network calls
+    implementation 'org.springframework.boot:spring-boot-starter-webflux'
+
+    //
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+
+    //View endpoints docs in browser
+    //The dependency is mentioned in the 'common' module
+
+    //for WAR
+    providedRuntime 'org.springframework.boot:spring-boot-starter-tomcat'
+
+    //For Customized Error Page (when no explicit mapping is found)
+    //implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
+
+    implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'
+    //implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-server' //needed?
+
+    //testing spring boot's email sending feature with 'scheduler' module
+    implementation 'org.springframework.boot:spring-boot-starter'
+    implementation 'org.springframework.boot:spring-boot-starter-mail'
+    implementation 'org.springframework.boot:spring-boot-starter-mail:2.3.5.RELEASE'
+    
+    //security
+    implementation("org.springframework.boot:spring-boot-starter-security")
+//    testImplementation("org.springframework.security:spring-security-test")
+
+    //For Working with Json Web Tokens (JWT)
+    //0.9.1
+    implementation group: 'io.jsonwebtoken', name: 'jjwt', version: project.getProperties().version__io_jsonwebtoken_jjwt
+
+}
+
+/*
+
+//Try to keep it in 'common'
+//region [DevTools]
+configurations {
+    developmentOnly
+    runtimeClasspath {
+        extendsFrom developmentOnly
+    }
+}
+dependencies {
+    developmentOnly("org.springframework.boot:spring-boot-devtools")
+}
+//endregion [DevTools]
+*/
+
+
+configurations.all {
+    exclude group: 'org.springframework.boot', module: 'spring-boot-starter-logging'
+    //exclude module: 'slf4j-log4j12' //check: must it be excluded?
+}
+
+
+bootWar {
+    //archiveName project.name + '.war'  //this works too
+    //archiveFileName = project.name + '.war'
+    archiveFileName = 'scheduler' + '.war'
+}
+
+
+//region [Remote Debugging]
+// Ensure each project uses a different remote debug port
+def remoteDebugPort = '9083'
+
+if (!project.hasProperty('prod')) {
+    bootRun.jvmArgs = ["-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=" + remoteDebugPort]
+}
+//endregion [Remote Debugging]

@@ -1,0 +1,37 @@
+server_port: 10083
+
+batch_thread_no: 1
+batch_fetch_row: 5
+
+billing_server: localhost
+billing_port: 10081
+billing_username: test
+billing_password: vZSzE3wz4HD3ReKKv0GodA==
+
+producer_server: localhost
+producer_port: 8082
+producer_username: tigerit
+producer_password: i1+ysQ8MQR7wx95a/hKtaA==
+
+communication_server: localhost
+communication_port: 8086
+communication_username: tigerit
+communication_password: i1+ysQ8MQR7wx95a/hKtaA==
+#communication_username: test
+#communication_password: vZSzE3wz4HD3ReKKv0GodA==
+
+backup_server: localhost
+backup_port: 8089
+backup_username: tigerit
+backup_password: i1+ysQ8MQR7wx95a/hKtaA==
+
+bill_generation: disable
+prepay_status_check: manual
+pdf_generation: manual
+email_sms_notification: manual
+daily_transaction: manual
+weekly_transaction: manual
+monthly_transaction: manual
+data_archive: manual
+#dummy_task : automatic
+dummy_task : manual
